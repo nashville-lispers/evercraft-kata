@@ -1,6 +1,7 @@
-(ns evercraft.combat)
+(ns evercraft.combat
+  (:require [evercraft.character :as game-character]))
 
-(def default-combatant {:ac 10 :hp 5})
+(def default-combatant (game-character/make-character))
 
 (defn- miss [attacker defender]
   (str (:name attacker) " missed " (:name defender)))
