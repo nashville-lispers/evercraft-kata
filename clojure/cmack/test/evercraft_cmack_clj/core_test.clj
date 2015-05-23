@@ -27,7 +27,11 @@
   (let [me (make-character :name "charlie")]
     (testing "Default values"
       (is (contains? me :abilities) "has abilities")
-      (is (every? #{10} (vals (:abilities me))) "default ability to 10"))))
+      (is (every? #{10} (vals (:abilities me))) "default ability to 10"))
+    (testing "Value ranges"
+      (let [me (make-character :name "charlie" :abilites {:strength 30 :stupidity 90})]
+        (is (not (contains? (:abilities me) :stupidity)) "invalid abilities should not exist")
+        (is (every? #(<= 1 %1 20) (vals (:abilities me))) "values in range")))))
 
 (deftest character-attack
   (let [attacker (make-character :name "attack")
