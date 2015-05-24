@@ -36,14 +36,33 @@
 (deftest character-attack
   (let [attacker (make-character :name "attack")
         defender (make-character :name "defend")]
+    (testing "Damage Calculation"
+      (is (= 1 (hit-damage) (hit-damage 0)))
+      (is (= (* 2 (hit-damage)) (critical-damage))
+          "unmodified crit damage should be double unmodified normal damage")
+      (is (= (critical-damage 5) (* 2 (hit-damage 10)))
+          "critical damage is double the hit damage with double modifier"))
+
     (testing "Critical Hit"
       (is (= 3 (:hit-points (attack attacker defender 20))) "critical hit damage")
       (let [defender (assoc defender :armor-class 100)]
         (is (hit? defender 20) "critical hit on high AC defender")
-        (is (= 3 (:hit-points (attack attacker defender 20))) "crit damage on high AC defender")))
+        (is (= 3 (:hit-points (attack attacker defender 20)))
+            "crit damage on high AC defender")))
+
     (testing "Basic Hits"
       (is (= 4 (:hit-points (attack attacker defender 10))) "roll == AC hit")
       (is (= 4 (:hit-points (attack attacker defender 11))) "roll > AC hit"))
+
     (testing "Death"
       (is (dead? (damage defender 100)) "dead on overwhelming damage")
-      (is (dead? (damage defender 5)) "dead on exact damage"))))
+      (is (dead? (damage defender 5)) "dead on exact damage"))
+
+    (testing "Ability modifiers"
+      (let [attacker (make-character :name "attack"
+                                     :abilities {:strength 14
+                                                 :dexterity 5
+                                                 :constitution 20})]
+        (is (= 10 (hit-points attacker)) "constitution modifier")
+        (is (= 7 (armor-class attacker)) "dexterity modifier")
+        (is (= 10 (hit-points attacker)) "constitution modifier")))))

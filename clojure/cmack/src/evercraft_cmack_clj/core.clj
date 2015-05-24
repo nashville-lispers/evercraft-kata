@@ -47,6 +47,20 @@
         abilities (make-abilities abilities)]
    (->character name alignment hit-points armor-class abilities)))
 
+(defn modifier
+  [ability-score]
+  (int (- (Math/floor (/ ability-score 2))
+          5)))
+
+(defn hit-points
+  [character]
+  (let [constitution-mod (modifier (:constitution (:abilities character)))]
+    (+ (:hit-points character) constitution-mod)))
+
+(defn armor-class
+  [character]
+  (let [dex-modifier (modifier (:dexterity (:abilities character)))]
+    (+ (:armor-class character) dex-modifier)))
 
 (defn damage
   [target damage]
@@ -58,22 +72,26 @@
 
 (defn hit?
   [character roll]
-  (or (>= roll (:armor-class character))
+  (or (>= roll (armor-class character))
       (critical-hit? roll)))
 
 (defn dead?
   [character]
-  (<= (:hit-points character) 0))
+  (<= (hit-points character) 0))
 
-(defn modifier
-  [ability-score]
-  (- (Math/floor (/ ability-score 2))
-     5))
+(defn hit-damage
+  [& [str-modifier]]
+  (max 1 (+ 1 (or str-modifier 0))))
+
+(defn critical-damage
+  [& [str-modifier]]
+  (* 2 (hit-damage (* 2 (or str-modifier 0)))))
 
 (defn attack
   [attacker target roll]
-  ;; todo range check roll
-  (cond
-    (critical-hit? roll) (damage target 2)
-    (hit? target roll) (damage target 1)
-    :else target))
+  (let [str-modifier (modifier (:strength (:abilities attacker)))
+        modified-roll (+ roll str-modifier)]
+   (cond
+     (critical-hit? modified-roll) (damage target (critical-damage str-modifier))
+     (hit? target modified-roll) (damage target (hit-damage str-modifier))
+     :else target)))
