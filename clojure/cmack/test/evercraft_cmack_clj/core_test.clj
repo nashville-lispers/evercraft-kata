@@ -9,7 +9,9 @@
       (is (contains? me :name) "has a name")
       (is (= (:name me) "charlie") "get character name")
       (is (= (:armor-class me) 10) "default armor class")
-      (is (= (:hit-points me) 5) "default hit points"))
+      (is (= (:hit-points me) 5) "default hit points")
+      (is (and (contains? me :level) (= (:level me) 1)) "Level defaults to 1"))
+
     (testing "Character name set"
       (let [me (assoc me :name "not charlie")]
         (is (= (:name me) "not charlie") "set character name")))))

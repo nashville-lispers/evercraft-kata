@@ -5,7 +5,7 @@
   (max (min val upper) lower))
 
 (defrecord character
-    [name alignment hit-points armor-class abilities])
+    [name alignment hit-points armor-class abilities level])
 
 (defrecord abilities
     [strength dexterity constitution wisdom intelligence charisma])
@@ -41,11 +41,11 @@
 
 (defn make-character
   "Create a character record"
-  [& {:keys [name alignment hit-points armor-class abilities]
-      :or {armor-class 10 hit-points 5}}]
+  [& {:keys [name alignment hit-points armor-class abilities level]
+      :or {armor-class 10 hit-points 5 level 1}}]
   (let [alignment (ensure-alignment alignment)
         abilities (make-abilities abilities)]
-   (->character name alignment hit-points armor-class abilities)))
+   (->character name alignment hit-points armor-class abilities level)))
 
 (defn modifier
   [ability-score]
