@@ -70,7 +70,15 @@
         (is (= 10 (hit-points attacker)) "constitution modifier")))))
 
 (deftest character-leveling
-  (testing "Basic leveling"
-    (is (= 1 (level (make-character :name "test"))) "Level defaults to 1")
-    (is (= 2 (level (make-character :name "test" :xp 1000))))
-    (is (= 3 (level (make-character :name "test" :xp 2000))))))
+  (let [level1 (make-character :name "test")
+        level2 (make-character :name "test" :xp 1000)]
+   (testing "Basic leveling"
+     (is (= 1 (level level1)) "Level defaults to 1")
+     (is (= 2 (level level2)))
+     (is (= 3 (level (make-character :name "test" :xp 2000)))))
+
+   (testing "Hit point bonuses"
+     (let [con-modifier (modifier (:constitution (:abilities level2)))
+           hp-delta (- (hit-points level2) (hit-points level1)) ]
+       (is (= hp-delta (* (+ 5 con-modifier)))
+           "Hit points increase by 5 plus constitution modifier per level")))))

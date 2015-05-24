@@ -52,14 +52,17 @@
   (int (- (Math/floor (/ ability-score 2))
           5)))
 
-(defn hit-points
-  [character]
-  (let [constitution-mod (modifier (:constitution (:abilities character)))]
-    (+ (:hit-points character) constitution-mod)))
-
 (defn level
   [character]
   (+ 1 (int (Math/floor (/ (:xp character) 1000)))))
+
+(defn hit-points
+  [character]
+  (let [constitution-mod (modifier (:constitution (:abilities character)))]
+    (+ (:hit-points character)
+       constitution-mod
+       (* (+ 5 constitution-mod)
+          (- (level character) 1)))))
 
 (defn armor-class
   [character]
