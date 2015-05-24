@@ -8,9 +8,9 @@
       ;; (is (instance? character me) "character creation")
       (is (contains? me :name) "has a name")
       (is (= (:name me) "charlie") "get character name")
-      (is (= (:armor-class me) 10) "default armor class")
-      (is (= (:hit-points me) 5) "default hit points")
-      (is (and (contains? me :level) (= (:level me) 1)) "Level defaults to 1"))
+      (is (= (:armor-class me) 10) "default armor class 10")
+      (is (= (:hit-points me) 5) "default hit points 5")
+      (is (and (contains? me :xp) (zero? (:xp me))) "default experience points 0"))
 
     (testing "Character name set"
       (let [me (assoc me :name "not charlie")]
@@ -68,3 +68,9 @@
         (is (= 10 (hit-points attacker)) "constitution modifier")
         (is (= 7 (armor-class attacker)) "dexterity modifier")
         (is (= 10 (hit-points attacker)) "constitution modifier")))))
+
+(deftest character-leveling
+  (testing "Basic leveling"
+    (is (= 1 (level (make-character :name "test"))) "Level defaults to 1")
+    (is (= 2 (level (make-character :name "test" :xp 1000))))
+    (is (= 3 (level (make-character :name "test" :xp 2000))))))
