@@ -94,10 +94,14 @@
   [& [str-modifier]]
   (* 2 (hit-damage (* 2 (or str-modifier 0)))))
 
+(defn roll-level-modifier
+  [character]
+  (int (Math/floor (/ (level character) 2))))
+
 (defn attack
   [attacker target roll]
   (let [str-modifier (modifier (:strength (:abilities attacker)))
-        modified-roll (+ roll str-modifier)]
+        modified-roll (+ roll str-modifier (roll-level-modifier attacker))]
    (cond
      (critical-hit? modified-roll) (damage target (critical-damage str-modifier))
      (hit? target modified-roll) (damage target (hit-damage str-modifier))

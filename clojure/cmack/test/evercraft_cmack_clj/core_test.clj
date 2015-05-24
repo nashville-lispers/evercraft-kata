@@ -81,4 +81,11 @@
      (let [con-modifier (modifier (:constitution (:abilities level2)))
            hp-delta (- (hit-points level2) (hit-points level1)) ]
        (is (= hp-delta (* (+ 5 con-modifier)))
-           "Hit points increase by 5 plus constitution modifier per level")))))
+           "Hit points increase by 5 plus constitution modifier per level")))
+
+   (testing "Roll modifiers for even levels"
+     (is (and (= (roll-level-modifier level1) 0)
+              (= (roll-level-modifier level2) 1)
+              (= (roll-level-modifier (make-character :name "level10" :xp 10000))
+                 5))
+         "Roll modified by plus 1 for every even level obtained"))))
