@@ -90,6 +90,10 @@
   [& [str-modifier]]
   (max 1 (+ 1 (or str-modifier 0))))
 
+(defn attack-success
+  [character]
+  (assoc character :xp (+ 10 (:xp character))))
+
 (defn critical-damage
   [& [str-modifier]]
   (* 2 (hit-damage (* 2 (or str-modifier 0)))))
@@ -103,6 +107,8 @@
   (let [str-modifier (modifier (:strength (:abilities attacker)))
         modified-roll (+ roll str-modifier (roll-level-modifier attacker))]
    (cond
-     (critical-hit? modified-roll) (damage target (critical-damage str-modifier))
-     (hit? target modified-roll) (damage target (hit-damage str-modifier))
-     :else target)))
+     (critical-hit? modified-roll)
+     [(attack-success attacker) (damage target (critical-damage str-modifier))]
+     (hit? target modified-roll)
+     [(attack-success attacker) (damage target (hit-damage str-modifier))]
+     :else [attacker target])))

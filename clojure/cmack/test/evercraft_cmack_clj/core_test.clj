@@ -30,10 +30,22 @@
     (testing "Default values"
       (is (contains? me :abilities) "has abilities")
       (is (every? #{10} (vals (:abilities me))) "default ability to 10"))
+
     (testing "Value ranges"
-      (let [me (make-character :name "charlie" :abilites {:strength 30 :stupidity 90})]
-        (is (not (contains? (:abilities me) :stupidity)) "invalid abilities should not exist")
-        (is (every? #(<= 1 %1 20) (vals (:abilities me))) "values in range")))))
+      (let [me (make-character :name "charlie"
+                               :abilites {:strength 30 :stupidity 90})]
+        (is (not (contains? (:abilities me) :stupidity))
+            "invalid abilities should not exist")
+        (is (every? #(<= 1 %1 20) (vals (:abilities me))) "values in range")))
+
+    (testing "Ability modifiers"
+      (let [attacker (make-character :name "attack"
+                                     :abilities {:strength 14
+                                                 :dexterity 5
+                                                 :constitution 20})]
+        (is (= 10 (hit-points attacker)) "constitution modifier")
+        (is (= 7 (armor-class attacker)) "dexterity modifier")
+        (is (= 10 (hit-points attacker)) "constitution modifier")))))
 
 (deftest character-attack
   (let [attacker (make-character :name "attack")
@@ -46,28 +58,25 @@
           "critical damage is double the hit damage with double modifier"))
 
     (testing "Critical Hit"
-      (is (= 3 (:hit-points (attack attacker defender 20))) "critical hit damage")
-      (let [defender (assoc defender :armor-class 100)]
+      (let [[attacker defender] (attack attacker defender 20)]
+        (is (= 3 (hit-points defender)) "critical hit damage")
+        (is (= 10 (:xp attacker)) "one attack success should increase XP by 10"))
+
+      (let [defender (assoc defender :armor-class 100)
+            [attacker defender] (attack attacker defender 20)]
         (is (hit? defender 20) "critical hit on high AC defender")
-        (is (= 3 (:hit-points (attack attacker defender 20)))
-            "crit damage on high AC defender")))
+        (is (= 3 (hit-points defender)) "crit damage on high AC defender")))
 
     (testing "Basic Hits"
-      (is (= 4 (:hit-points (attack attacker defender 10))) "roll == AC hit")
-      (is (= 4 (:hit-points (attack attacker defender 11))) "roll > AC hit"))
+      (let [[attacker defense1] (attack attacker defender 10)
+            [attacker defense2] (attack attacker defender 11)]
+        (is (= 4 (hit-points defense1)) "roll == AC hit")
+        (is (= 4 (hit-points defense2)) "roll > AC hit")
+        (is (= 20 (:xp attacker)) "2 attack successes should increase XP by 20")))
 
     (testing "Death"
       (is (dead? (damage defender 100)) "dead on overwhelming damage")
-      (is (dead? (damage defender 5)) "dead on exact damage"))
-
-    (testing "Ability modifiers"
-      (let [attacker (make-character :name "attack"
-                                     :abilities {:strength 14
-                                                 :dexterity 5
-                                                 :constitution 20})]
-        (is (= 10 (hit-points attacker)) "constitution modifier")
-        (is (= 7 (armor-class attacker)) "dexterity modifier")
-        (is (= 10 (hit-points attacker)) "constitution modifier")))))
+      (is (dead? (damage defender 5)) "dead on exact damage"))))
 
 (deftest character-leveling
   (let [level1 (make-character :name "test")
